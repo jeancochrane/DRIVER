@@ -8,7 +8,7 @@ import glob
 import logging
 import json
 import os
-from osgeo import ogr, osr
+# from osgeo import ogr, osr
 import pytz
 from time import sleep
 import uuid
@@ -58,7 +58,7 @@ def transform(record, schema_id):
         'geom': 'POINT (0 0)'
     }
     data = obj['data']
-    for key, value in details_mapping.iteritems():
+    for key, value in details_mapping.items():
         if key in record:
             data['incidentDetails'][value] = record[key]
 
@@ -74,6 +74,7 @@ def transform(record, schema_id):
     obj['occurred_from'] = occurred_date.isoformat()
     obj['occurred_to'] = occurred_date.isoformat()
 
+    """
     # Set the geom field
     point = ogr.Geometry(ogr.wkbPoint)
 
@@ -96,6 +97,7 @@ def transform(record, schema_id):
         point.Transform(transform)
 
     obj['geom'] = point.ExportToWkt()
+    """
     return obj
 
 
@@ -105,8 +107,8 @@ def load(obj, api, headers=None):
         headers = {}
     response = requests.post(api + '/records/',
                              data=json.dumps(obj),
-                             headers=dict({'content-type': 'application/json'}.items() +
-                                          headers.items()))
+                             headers=dict(list({'content-type': 'application/json'}.items()) +
+                                          list(headers.items())))
     sleep(0.2)
     if response.status_code != 201:
         logger.error(response.text)
@@ -132,8 +134,8 @@ def create_schema(schema_path, api, headers=None):
         response = requests.post(api + '/recordschemas/',
                                  data=json.dumps({u'record_type': rectype_id,
                                                   u'schema': schema_json}),
-                                 headers=dict({'content-type': 'application/json'}.items() +
-                                              headers.items()))
+                                 headers=dict(list({'content-type': 'application/json'}.items()) +
+                                              list(headers.items())))
     logger.debug(response.json())
     response.raise_for_status()
     logger.info('Created RecordSchema')
